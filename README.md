@@ -11,9 +11,13 @@ Convert HTML or JSXElement to PNG image with Chinese font support.
 - Convert HTML string to PNG image
 - Support JSXElement input
 - Support Chinese fonts (Noto Sans SC)
+- Support Roboto fonts
+- Support custom fonts
 - Support external images
 - Support CSS styles
 - Support SVG elements
+- TypeScript support with comprehensive type definitions
+- Error handling with custom error types
 
 ## Installation
 
@@ -61,6 +65,26 @@ const jsx: JSXElement = {
 const buffer = await html2img(jsx);
 ```
 
+### With Custom Fonts
+
+```typescript
+import { html2img, loadCustomFont, loadRobotoFonts } from 'html2img';
+
+// Load custom font
+const customFont = loadCustomFont('/path/to/font.ttf', {
+  name: 'My Custom Font',
+  weight: 700,
+  style: 'normal'
+});
+
+// Load Roboto fonts
+const { normal, bold } = loadRobotoFonts();
+
+const buffer = await html2img(html, {
+  fonts: [customFont, normal, bold]
+});
+```
+
 ### With External Image
 
 ```typescript
@@ -88,6 +112,7 @@ const buffer = await html2img(html, {
   - `width`: Width of the output image (default: 800)
   - `height`: Height of the output image (default: 600)
   - `baseUrl`: Base URL for resolving relative paths in HTML
+  - `fonts`: Array of font configurations
 
 #### Returns
 
@@ -99,90 +124,118 @@ Promise that resolves to a Buffer containing the PNG image data.
 interface JSXElement {
   type: string;
   props: {
-    [key: string]: any;
+    style?: StyleObject;
+    src?: string;
+    href?: string;
+    children?: (JSXElement | string)[];
+    [key: string]: StyleObject | string | (JSXElement | string)[] | undefined;
   };
-  children: (string | JSXElement)[];
+  children?: (JSXElement | string)[];
 }
 
-interface Html2ImgOptions {
-  width?: number;
-  height?: number;
-  baseUrl?: string;
+interface StyleObject {
+  display?: string;
+  flexDirection?: string;
+  alignItems?: string;
+  justifyContent?: string;
+  gap?: string;
+  margin?: string;
+  padding?: string;
+  width?: string | number;
+  height?: string | number;
+  backgroundColor?: string;
+  color?: string;
+  fontSize?: string;
+  fontWeight?: string | number;
+  textAlign?: string;
+  borderRadius?: string;
+  border?: string;
+  boxShadow?: string;
+  position?: string;
+  top?: string | number;
+  right?: string | number;
+  bottom?: string | number;
+  left?: string | number;
+  zIndex?: number;
+  overflow?: string;
+  opacity?: number;
+  transform?: string;
+  transition?: string;
+  listStyle?: string;
+  lineHeight?: string | number;
+  letterSpacing?: string;
+  textDecoration?: string;
+  backgroundImage?: string;
+  backgroundSize?: string;
+  backgroundPosition?: string;
+  backgroundRepeat?: string;
+  [key: string]: string | number | undefined;
+}
+
+interface FontConfig {
+  name: string;
+  data: Buffer;
+  weight: FontWeight;
+  style: FontStyle;
+}
+
+enum FontWeight {
+  THIN = 100,
+  EXTRA_LIGHT = 200,
+  LIGHT = 300,
+  NORMAL = 400,
+  MEDIUM = 500,
+  SEMI_BOLD = 600,
+  BOLD = 700,
+  EXTRA_BOLD = 800,
+  BLACK = 900
+}
+
+enum FontStyle {
+  NORMAL = 'normal',
+  ITALIC = 'italic'
+}
+```
+
+## Error Handling
+
+The library provides a custom error class `Html2ImgError` for better error handling:
+
+```typescript
+import { Html2ImgError } from 'html2img';
+
+try {
+  const buffer = await html2img(html);
+} catch (error) {
+  if (error instanceof Html2ImgError) {
+    console.error('Error:', error.message);
+    console.error('Cause:', error.cause);
+  }
 }
 ```
 
 ## Development
 
-### Prerequisites
-
-- Node.js >= 18.0.0
-- pnpm >= 8.0.0
-
 ### Setup
 
 ```bash
-# Clone the repository
 git clone https://github.com/yourusername/html2img.git
 cd html2img
-
-# Install dependencies
-pnpm install
-
-# Build
-pnpm build
-
-# Run tests
-pnpm test
+npm install
 ```
 
-### Project Structure
+### Testing
 
-```
-html2img/
-├── src/
-│   ├── core/         # Core conversion logic
-│   ├── utils/        # Utility functions
-│   ├── types/        # TypeScript type definitions
-│   └── index.ts      # Main entry point
-├── dist/             # Build output
-├── examples/         # Usage examples
-└── tests/            # Test files
+```bash
+npm test
 ```
 
-### Contributing
+### Linting
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feat/amazing-feature`)
-3. Commit your changes (`git commit -m 'feat: add amazing feature'`)
-4. Push to the branch (`git push origin feat/amazing-feature`)
-5. Open a Pull Request
-
-Please follow the [Conventional Commits](https://www.conventionalcommits.org/) specification for commit messages.
-
-## Release Process
-
-This project uses [Release Please](https://github.com/google-github-actions/release-please-action) for automated version management and releases.
-
-### Commit Types
-
-- `feat`: New features
-- `fix`: Bug fixes
-- `docs`: Documentation changes
-- `chore`: Maintenance tasks
-- `refactor`: Code refactoring
-- `test`: Test-related changes
-- `build`: Build system changes
-- `ci`: CI configuration changes
-- `perf`: Performance improvements
-- `style`: Code style changes
-- `revert`: Revert changes
-
-### Version Bumping
-
-- `feat` -> Minor version (1.0.0 -> 1.1.0)
-- `fix` -> Patch version (1.0.0 -> 1.0.1)
-- `BREAKING CHANGE` -> Major version (1.0.0 -> 2.0.0)
+```bash
+npm run lint
+```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details. 
+MIT 
