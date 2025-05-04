@@ -3,8 +3,7 @@ node_modules/
 .pnpm-store/
 
 # Build output
-dist/
-coverage/
+lib/
 
 # IDE
 .idea/
@@ -22,6 +21,7 @@ pnpm-debug.log*
 
 # Test outputs
 src/__tests__/test-outputs/
+src/test.ts
 
 # Environment variables
 .env
@@ -30,4 +30,5 @@ src/__tests__/test-outputs/
 
 # OS
 .DS_Store
-Thumbs.db 
+Thumbs.db
+/src/test.tsx

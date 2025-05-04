@@ -1,24 +1,16 @@
 {
   "compilerOptions": {
-    "target": "es2018",
-    "module": "esnext",
-    "lib": ["dom", "es2018"],
+    "target": "ES2020",
+    "module": "CommonJS",
+    "lib": ["ES2020", "DOM"],
     "declaration": true,
-    "outDir": "./dist",
+    "outDir": "./lib",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "allowJs": true,
-    "checkJs": false
+    "jsx": "react-jsx"
   },
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  },
-  "include": ["src/**/*", "examples/**/*"],
+  "include": ["src"],
   "exclude": ["node_modules", "dist"]
-} 
+}

@@ -1,240 +1,121 @@
-# html2img
+# HTML to Image Generator
 
-Convert HTML or JSXElement to PNG image with Chinese font support.
-
-[![npm version](https://badge.fury.io/js/html2img.svg)](https://badge.fury.io/js/html2img)
-[![CI](https://github.com/yourusername/html2img/actions/workflows/ci.yml/badge.svg)](https://github.com/yourusername/html2img/actions/workflows/ci.yml)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+A powerful tool for generating Open Graph images dynamically from HTML, React components, and Vue components without a browser.
 
 ## Features
 
-- Convert HTML string to PNG image
-- Support JSXElement input
-- Support Chinese fonts (Noto Sans SC)
-- Support Roboto fonts
-- Support custom fonts
-- Support external images
-- Support CSS styles
-- Support SVG elements
-- TypeScript support with comprehensive type definitions
-- Error handling with custom error types
+- 🖼️ Generate images from React components
+- 📝 Convert HTML to images
+- 🎨 Support for Vue single file components
+- 🌏 Multi-language support with automatic font detection
+- 😀 Emoji support
+- 🎨 Modern CSS features support
 
 ## Installation
 
 ```bash
-npm install html2img
+npm install img-generator
 # or
-yarn add html2img
+yarn add img-generator
 # or
-pnpm add html2img
+pnpm add img-generator
 ```
 
 ## Usage
 
-### Basic Usage
+### React Component to Image
+
+```typescript-jsx
+import { reactToBuffer } from 'img-generator';
+
+const element = (
+  <div
+    style={{
+      fontSize: 128,
+      background: 'white',
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      textAlign: 'center',
+      alignItems: 'center',
+      justifyContent: 'center',
+    }}
+  >
+    Hello world!
+  </div>
+);
+
+const buffer = await reactToBuffer(element, {
+  width: 1200,
+  height: 630,
+});
+```
+
+### HTML to Image
 
 ```typescript
-import { html2img } from 'html2img';
+import { htmlToBuffer } from 'img-generator';
 
 const html = `
-  <div style="width: 100px; height: 100px; background-color: red;">
-    Hello World
+  <div style="
+    font-size: 128px;
+    background: white;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  ">
+    Hello world!
   </div>
 `;
 
-const buffer = await html2img(html);
-```
-
-### With JSXElement
-
-```typescript
-import { html2img, JSXElement } from 'html2img';
-
-const jsx: JSXElement = {
-  type: 'div',
-  props: {
-    style: {
-      width: '100px',
-      height: '100px',
-      backgroundColor: 'red'
-    }
-  },
-  children: ['Hello World']
-};
-
-const buffer = await html2img(jsx);
-```
-
-### With Custom Fonts
-
-```typescript
-import { html2img, loadCustomFont, loadRobotoFonts } from 'html2img';
-
-// Load custom font
-const customFont = loadCustomFont('/path/to/font.ttf', {
-  name: 'My Custom Font',
-  weight: 700,
-  style: 'normal'
-});
-
-// Load Roboto fonts
-const { normal, bold } = loadRobotoFonts();
-
-const buffer = await html2img(html, {
-  fonts: [customFont, normal, bold]
+const buffer = await htmlToBuffer(html, {
+  width: 1200,
+  height: 630,
 });
 ```
 
-### With External Image
+### Vue Component to Image
 
 ```typescript
-import { html2img } from 'html2img';
+import { vueToBuffer } from 'img-generator';
 
-const html = `
-  <div>
-    <img src="https://example.com/image.jpg" />
+const vueCode = `
+<template>
+  <div class="container">
+    <h1>Hello World</h1>
   </div>
+</template>
+
+<style>
+.container {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
+</style>
 `;
 
-const buffer = await html2img(html, {
-  baseUrl: 'https://example.com'
+const buffer = await vueToBuffer(vueCode, {
+  width: 1200,
+  height: 630,
 });
 ```
 
-## API
+## Configuration
 
-### html2img(input: string | JSXElement, options?: Html2ImgOptions): Promise<Buffer>
+### Image Options
 
-#### Parameters
-
-- `input`: HTML string or JSXElement to convert
-- `options`: Optional configuration
-  - `width`: Width of the output image (default: 800)
-  - `height`: Height of the output image (default: 600)
-  - `baseUrl`: Base URL for resolving relative paths in HTML
-  - `fonts`: Array of font configurations
-
-#### Returns
-
-Promise that resolves to a Buffer containing the PNG image data.
-
-### Types
-
-```typescript
-interface JSXElement {
-  type: string;
-  props: {
-    style?: StyleObject;
-    src?: string;
-    href?: string;
-    children?: (JSXElement | string)[];
-    [key: string]: StyleObject | string | (JSXElement | string)[] | undefined;
-  };
-  children?: (JSXElement | string)[];
-}
-
-interface StyleObject {
-  display?: string;
-  flexDirection?: string;
-  alignItems?: string;
-  justifyContent?: string;
-  gap?: string;
-  margin?: string;
-  padding?: string;
-  width?: string | number;
-  height?: string | number;
-  backgroundColor?: string;
-  color?: string;
-  fontSize?: string;
-  fontWeight?: string | number;
-  textAlign?: string;
-  borderRadius?: string;
-  border?: string;
-  boxShadow?: string;
-  position?: string;
-  top?: string | number;
-  right?: string | number;
-  bottom?: string | number;
-  left?: string | number;
-  zIndex?: number;
-  overflow?: string;
-  opacity?: number;
-  transform?: string;
-  transition?: string;
-  listStyle?: string;
-  lineHeight?: string | number;
-  letterSpacing?: string;
-  textDecoration?: string;
-  backgroundImage?: string;
-  backgroundSize?: string;
-  backgroundPosition?: string;
-  backgroundRepeat?: string;
-  [key: string]: string | number | undefined;
-}
-
-interface FontConfig {
-  name: string;
-  data: Buffer;
-  weight: FontWeight;
-  style: FontStyle;
-}
-
-enum FontWeight {
-  THIN = 100,
-  EXTRA_LIGHT = 200,
-  LIGHT = 300,
-  NORMAL = 400,
-  MEDIUM = 500,
-  SEMI_BOLD = 600,
-  BOLD = 700,
-  EXTRA_BOLD = 800,
-  BLACK = 900
-}
-
-enum FontStyle {
-  NORMAL = 'normal',
-  ITALIC = 'italic'
-}
-```
-
-## Error Handling
-
-The library provides a custom error class `Html2ImgError` for better error handling:
-
-```typescript
-import { Html2ImgError } from 'html2img';
-
-try {
-  const buffer = await html2img(html);
-} catch (error) {
-  if (error instanceof Html2ImgError) {
-    console.error('Error:', error.message);
-    console.error('Cause:', error.cause);
-  }
-}
-```
-
-## Development
-
-### Setup
-
-```bash
-git clone https://github.com/yourusername/html2img.git
-cd html2img
-npm install
-```
-
-### Testing
-
-```bash
-npm test
-```
-
-### Linting
-
-```bash
-npm run lint
-```
+- `width` (number, default: 1200): The width of the image
+- `height` (number, default: 630): The height of the image
+- `debug` (boolean, default: false): Display debug information
+- `fontSource` (string, default: 'github'): Font source ('github' or 'gitee')
+- `props` (object, default: {}): Additional props to pass to components
 
 ## License
 

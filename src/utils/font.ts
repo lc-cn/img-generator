@@ -1,131 +1,134 @@
-import fs from 'fs';
-import path from 'path';
-import { Html2ImgError } from '../types';
+type UnicodeRange = Array<number | number[]>
 
-export enum FontWeight {
-  THIN = 100,
-  EXTRA_LIGHT = 200,
-  LIGHT = 300,
-  NORMAL = 400,
-  MEDIUM = 500,
-  SEMI_BOLD = 600,
-  BOLD = 700,
-  EXTRA_BOLD = 800,
-  BLACK = 900
-}
+export class FontDetector {
+  private rangesByLang: {
+    [font: string]: UnicodeRange
+  } = {}
 
-export enum FontStyle {
-  NORMAL = 'normal',
-  ITALIC = 'italic'
-}
+  public async detect(
+    text: string,
+    fonts: string[]
+  ): Promise<{
+    [lang: string]: string
+  }> {
+    await this.load(fonts)
 
-/**
- * 字体配置接口
- */
-export interface FontConfig {
-  name: string;
-  data: Buffer;
-  weight: FontWeight;
-  style: FontStyle;
-}
+    const result: {
+      [lang: string]: string
+    } = {}
 
-/**
- * 加载默认中文字体
- */
-export function loadDefaultChineseFont(): FontConfig {
-  try {
-    const fontPath = path.join(
-      process.cwd(),
-      'node_modules/@fontsource/noto-sans-sc/files/noto-sans-sc-chinese-simplified-400-normal.woff'
-    );
-    if (!fs.existsSync(fontPath)) {
-      throw new Html2ImgError('Default Chinese font not found');
+    for (const segment of text) {
+      const lang = this.detectSegment(segment, fonts)
+      if (lang) {
+        result[lang] = result[lang] || ''
+        result[lang] += segment
+      }
     }
-    const fontData = fs.readFileSync(fontPath);
-    return {
-      name: 'Noto Sans SC',
-      data: fontData,
-      weight: FontWeight.NORMAL,
-      style: FontStyle.NORMAL,
-    };
-  } catch (error) {
-    throw new Html2ImgError('Failed to load default Chinese font', error);
-  }
-}
 
-/**
- * 加载自定义字体
- */
-export function loadCustomFont(
-  fontPath: string,
-  options: Partial<Omit<FontConfig, 'data'>> = {}
-): FontConfig {
-  try {
-    if (!fs.existsSync(fontPath)) {
-      return loadDefaultChineseFont();
+    return result
+  }
+
+  private detectSegment(segment: string, fonts: string[]): string | null {
+    for (const font of fonts) {
+      const range = this.rangesByLang[font]
+      if (range && checkSegmentInRange(segment, range)) {
+        return font
+      }
     }
-    const fontData = fs.readFileSync(fontPath);
-    return {
-      name: options.name || 'Custom Font',
-      data: fontData,
-      weight: options.weight || FontWeight.NORMAL,
-      style: options.style || FontStyle.NORMAL,
-    };
-  } catch (error) {
-    return loadDefaultChineseFont();
+
+    return null
+  }
+
+  private async load(fonts: string[]): Promise<void> {
+    let params = ''
+
+    const existingLang = Object.keys(this.rangesByLang)
+    const langNeedsToLoad = fonts.filter((font) => !existingLang.includes(font))
+
+    if (langNeedsToLoad.length === 0) {
+      return
+    }
+
+    for (const font of langNeedsToLoad) {
+      params += `family=${font}&`
+    }
+    params += 'display=swap'
+
+    const API = `https://fonts.googleapis.com/css2?${params}`
+
+    const fontFace = await (
+      await fetch(API, {
+        headers: {
+          // Make sure it returns TTF.
+          'User-Agent':
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+        },
+      })
+    ).text()
+
+    this.addDetectors(fontFace)
+  }
+
+  private addDetectors(input: string) {
+    const regex = /font-family:\s*'(.+?)';.+?unicode-range:\s*(.+?);/gms
+    const matches = input.matchAll(regex)
+
+    for (const [, _lang, range] of matches) {
+      const lang = _lang.replace(/\s/g, '+')
+      if (!this.rangesByLang[lang]) {
+        this.rangesByLang[lang] = []
+      }
+
+      this.rangesByLang[lang].push(...convert(range))
+    }
   }
 }
 
-/**
- * 加载 Roboto 字体
- */
-export function loadRobotoFonts(): { normal: FontConfig; bold: FontConfig } {
-  try {
-    const robotoNormal = fs.readFileSync(
-      path.join(
-        process.cwd(),
-        'node_modules/@fontsource/roboto/files/roboto-latin-400-normal.woff'
-      )
-    );
-    const robotoBold = fs.readFileSync(
-      path.join(
-        process.cwd(),
-        'node_modules/@fontsource/roboto/files/roboto-latin-700-normal.woff'
-      )
-    );
+function convert(input: string): UnicodeRange {
+  return input.split(', ').map((range) => {
+    range = range.replace(/U\+/g, '')
+    const [start, end] = range.split('-').map((hex) => parseInt(hex, 16))
 
-    return {
-      normal: {
-        name: 'Roboto',
-        data: robotoNormal,
-        weight: FontWeight.NORMAL,
-        style: FontStyle.NORMAL,
-      },
-      bold: {
-        name: 'Roboto',
-        data: robotoBold,
-        weight: FontWeight.BOLD,
-        style: FontStyle.NORMAL,
-      },
-    };
-  } catch (error) {
-    throw new Html2ImgError(
-      'Failed to load Roboto font files. Make sure @fontsource/roboto is installed',
-      error
-    );
-  }
+    if (isNaN(end)) {
+      return start
+    }
+
+    return [start, end]
+  })
 }
 
-export async function loadFont(fontPath: string): Promise<FontConfig> {
-  try {
-    const fontData = await fs.promises.readFile(fontPath);
-    return {
-      name: path.basename(fontPath, path.extname(fontPath)),
-      data: fontData,
-      weight: FontWeight.NORMAL,
-      style: FontStyle.NORMAL
-    };
-  } catch (error) {
-    throw new Error(`Failed to load font: ${error instanceof Error ? error.message : String(error)}`);
-  }
+function checkSegmentInRange(segment: string, range: UnicodeRange): boolean {
+  const codePoint = segment.codePointAt(0)
+
+  if (!codePoint) return false
+
+  return range.some((val) => {
+    if (typeof val === 'number') {
+      return codePoint === val
+    } else {
+      const [start, end] = val
+      return start <= codePoint && codePoint <= end
+    }
+  })
+}
+
+// @TODO: Support font style and weights, and make this option extensible rather
+// than built-in.
+// @TODO: Cover most languages with Noto Sans.
+export const languageFontMap = {
+  'ja-JP': 'Noto+Sans+JP',
+  'ko-KR': 'Noto+Sans+KR',
+  'zh-CN': 'Noto+Sans+SC',
+  'zh-TW': 'Noto+Sans+TC',
+  'zh-HK': 'Noto+Sans+HK',
+  'th-TH': 'Noto+Sans+Thai',
+  'bn-IN': 'Noto+Sans+Bengali',
+  'ar-AR': 'Noto+Sans+Arabic',
+  'ta-IN': 'Noto+Sans+Tamil',
+  'ml-IN': 'Noto+Sans+Malayalam',
+  'he-IL': 'Noto+Sans+Hebrew',
+  'te-IN': 'Noto+Sans+Telugu',
+  devanagari: 'Noto+Sans+Devanagari',
+  kannada: 'Noto+Sans+Kannada',
+  unknown: 'Noto+Sans',
 }
