@@ -1,9 +1,18 @@
 {
   "name": "img-generator",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "description": "Generate Open Graph images dynamically from HTML/CSS without a browser",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "keywords": [
+    "nodejs",
+    "react",
+    "vue",
+    "html",
+    "css",
+    "image",
+    "generator"
+  ],
   "files": [
     "lib",
     "public",
@@ -14,6 +23,7 @@
     "build": "tsc",
     "clean": "rm -rf lib",
     "prebuild": "npm run clean",
+    "pub": "npm publish --access public",
     "test": "ts-node src/test.tsx"
   },
   "dependencies": {

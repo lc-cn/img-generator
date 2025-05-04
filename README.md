@@ -7,7 +7,7 @@ A powerful tool for generating Open Graph images dynamically from HTML, React co
 - 🖼️ Generate images from React components
 - 📝 Convert HTML to images
 - 🎨 Support for Vue single file components
-- 🌏 Multi-language support with automatic font detection
+- 🌏 Multi-language support with automatic font detection (Japanese, Korean, Chinese, Thai, Bengali, Arabic, Tamil, Malayalam, Hebrew, Telugu, Devanagari, Kannada)
 - 😀 Emoji support
 - 🎨 Modern CSS features support
 
@@ -114,8 +114,27 @@ const buffer = await vueToBuffer(vueCode, {
 - `width` (number, default: 1200): The width of the image
 - `height` (number, default: 630): The height of the image
 - `debug` (boolean, default: false): Display debug information
-- `fontSource` (string, default: 'github'): Font source ('github' or 'gitee')
 - `props` (object, default: {}): Additional props to pass to components
+
+### Font Support
+
+The library automatically detects the language of your text and uses appropriate fonts from the Noto Sans family:
+
+- Japanese: Noto Sans JP
+- Korean: Noto Sans KR
+- Chinese (Simplified): Noto Sans SC
+- Chinese (Traditional): Noto Sans TC
+- Chinese (Hong Kong): Noto Sans HK
+- Thai: Noto Sans Thai
+- Bengali: Noto Sans Bengali
+- Arabic: Noto Sans Arabic
+- Tamil: Noto Sans Tamil
+- Malayalam: Noto Sans Malayalam
+- Hebrew: Noto Sans Hebrew
+- Telugu: Noto Sans Telugu
+- Devanagari: Noto Sans Devanagari
+- Kannada: Noto Sans Kannada
+- Others: Noto Sans (default)
 
 ## License
 
