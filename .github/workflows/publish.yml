@@ -126,13 +126,14 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
         
-      - name: Build playground
-        run: pnpm build:playground
+      - name: Build packages
+        run: |
+          pnpm build:core
+          pnpm build:playground
         
       - name: Deploy to Vercel
         if: env.VERCEL_TOKEN
         run: |
-          cd packages/playground
           npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}

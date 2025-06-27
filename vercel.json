@@ -1,11 +1,9 @@
 {
   "version": 2,
   "name": "img-generator-playground",
-  "framework": "nextjs",
   "buildCommand": "pnpm build:core && pnpm build:playground",
   "outputDirectory": "packages/playground/.next",
   "installCommand": "pnpm install --frozen-lockfile",
-  "rootDirectory": "packages/playground",
   "functions": {
     "packages/playground/app/api/og/route.ts": {
       "maxDuration": 30,
