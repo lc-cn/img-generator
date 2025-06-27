@@ -1,0 +1,41 @@
+{
+  "packages": {
+    "packages/core": {
+      "package-name": "img-generator",
+      "release-type": "node",
+      "bump-minor-pre-major": true,
+      "bump-patch-for-minor-pre-major": true,
+      "draft": false,
+      "prerelease": false,
+      "include-component-in-tag": false,
+      "include-v-in-tag": true,
+      "tag-separator": "@",
+      "separate-pull-requests": false,
+      "skip-github-release": false,
+      "changelog-sections": [
+        {"type": "feat", "section": "Features", "hidden": false},
+        {"type": "fix", "section": "Bug Fixes", "hidden": false},
+        {"type": "docs", "section": "Documentation", "hidden": false},
+        {"type": "chore", "section": "Maintenance", "hidden": false},
+        {"type": "refactor", "section": "Code Refactoring", "hidden": false},
+        {"type": "test", "section": "Tests", "hidden": false},
+        {"type": "build", "section": "Build System", "hidden": false},
+        {"type": "ci", "section": "Continuous Integration", "hidden": false},
+        {"type": "perf", "section": "Performance Improvements", "hidden": false},
+        {"type": "style", "section": "Code Style", "hidden": false},
+        {"type": "revert", "section": "Reverts", "hidden": false}
+      ],
+      "extra-files": [
+        "README.md",
+        "package.json"
+      ]
+    }
+  },
+  "bootstrap-sha": "4189fba6fdcaf8d92aec2605b200aa2dcbb787c0",
+  "last-release-sha": "4189fba6fdcaf8d92aec2605b200aa2dcbb787c0",
+  "always-link-local": false,
+  "separate-pull-requests": false,
+  "group-pull-request-title-pattern": "chore: release ${version}",
+  "release-search-depth": 400,
+  "commit-search-depth": 500
+} 
