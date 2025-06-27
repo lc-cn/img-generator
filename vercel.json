@@ -20,11 +20,5 @@
       "source": "/api/:path*",
       "destination": "/api/:path*"
     }
-  ],
-  "ignores": [
-    "packages/core/**",
-    "scripts/**",
-    "*.md",
-    ".github/**"
   ]
 } 
