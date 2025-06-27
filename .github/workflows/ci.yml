@@ -2,34 +2,95 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, master ]
 
 jobs:
   test:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18.x, 20.x]
+        node-version: [18.x]
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout code
+      uses: actions/checkout@v4
     
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
         
-    - uses: pnpm/action-setup@v2
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
+      with:
+        version: 8.6.0
+        
+    - name: Get pnpm store directory
+      id: pnpm-cache
+      shell: bash
+      run: |
+        echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+        
+    - name: Setup pnpm cache
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        restore-keys: |
+          ${{ runner.os }}-pnpm-store-
+        
+    - name: Install dependencies
+      run: pnpm install --frozen-lockfile
+      
+    - name: Lint
+      run: pnpm lint
+      
+    - name: Test core package
+      run: pnpm test
+      
+    - name: Build all packages
+      run: pnpm build
+      
+    - name: Check build artifacts
+      run: |
+        echo "Checking core build artifacts..."
+        ls -la packages/core/lib/
+        echo "Checking playground build artifacts..."
+        ls -la packages/playground/.next/
+        
+  build-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        package: [core, playground]
+        
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Use Node.js 20.x
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v2
       with:
         version: 8.6.0
         
     - name: Install dependencies
-      run: pnpm install
+      run: pnpm install --frozen-lockfile
       
-    - name: Run tests
-      run: pnpm test
+    - name: Build ${{ matrix.package }}
+      run: pnpm build:${{ matrix.package }}
       
-    - name: Build
-      run: pnpm build 
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.package }}-build
+        path: |
+          packages/${{ matrix.package }}/lib/
+          packages/${{ matrix.package }}/.next/
+        retention-days: 1 

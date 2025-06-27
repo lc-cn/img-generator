@@ -1,32 +1,71 @@
 name: release-please
+
 on:
   push:
     branches:
       - main
-  pull_request:
-    types: [opened, synchronize]
+      - master
 
 jobs:
   release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+      version: ${{ steps.release.outputs.version }}
     steps:
-      - uses: google-github-actions/release-please-action@v3
+      - name: Run release-please
+        id: release
+        uses: google-github-actions/release-please-action@v4
         with:
           release-type: node
-          package-name: html2img
+          package-name: img-generator
           token: ${{ secrets.GITHUB_TOKEN }}
-          command: manifest
-          changelog-types: |
-            [
-              {"type":"feat","section":"Features","hidden":false},
-              {"type":"fix","section":"Bug Fixes","hidden":false},
-              {"type":"docs","section":"Documentation","hidden":false},
-              {"type":"chore","section":"Maintenance","hidden":false},
-              {"type":"refactor","section":"Code Refactoring","hidden":false},
-              {"type":"test","section":"Tests","hidden":false},
-              {"type":"build","section":"Build System","hidden":false},
-              {"type":"ci","section":"Continuous Integration","hidden":false},
-              {"type":"perf","section":"Performance Improvements","hidden":false},
-              {"type":"style","section":"Code Style","hidden":false},
-              {"type":"revert","section":"Reverts","hidden":false}
-            ] 
+          config-file: .github/release-please-config.json
+          manifest-file: .github/.release-please-manifest.json
+          
+  # 当release-please创建了新的release时，自动发布到NPM
+  publish-on-release:
+    needs: release-please
+    if: ${{ needs.release-please.outputs.release_created }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.0
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build core package
+        run: pnpm build:core
+        
+      - name: Run tests
+        run: pnpm test
+        
+      - name: Make core package public
+        run: |
+          cd packages/core
+          # 移除 private 字段以允许发布
+          node -e "
+            const pkg = require('./package.json');
+            delete pkg.private;
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          
+      - name: Publish core package to NPM
+        run: |
+          cd packages/core
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 

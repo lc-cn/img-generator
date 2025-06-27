@@ -3,29 +3,138 @@ name: Publish
 on:
   release:
     types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g., 1.0.0)'
+        required: true
+        type: string
+      tag:
+        description: 'NPM tag (e.g., latest, beta)'
+        required: false
+        default: 'latest'
+        type: string
 
 jobs:
-  publish:
+  publish-core:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          # 获取完整的git历史，以便正确计算版本
+          fetch-depth: 0
       
-      - uses: actions/setup-node@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
           
-      - uses: pnpm/action-setup@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.6.0
+          
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+          
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+        
+      - name: Build core package
+        run: pnpm build:core
+        
+      - name: Run tests
+        run: pnpm test
+        
+      - name: Update core package version
+        if: github.event.inputs.version
+        run: |
+          cd packages/core
+          npm version ${{ github.event.inputs.version }} --no-git-tag-version
+          
+      - name: Make core package public
+        run: |
+          cd packages/core
+          # 移除 private 字段以允许发布
+          node -e "
+            const pkg = require('./package.json');
+            delete pkg.private;
+            require('fs').writeFileSync('./package.json', JSON.stringify(pkg, null, 2) + '\n');
+          "
+          
+      - name: Publish core package to NPM
+        run: |
+          cd packages/core
+          npm publish --access public --tag ${{ github.event.inputs.tag || 'latest' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          
+      - name: Create GitHub Release
+        if: github.event.inputs.version
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.event.inputs.version }}
+          release_name: Release v${{ github.event.inputs.version }}
+          body: |
+            ## 🚀 New Release: v${{ github.event.inputs.version }}
+            
+            ### 📦 Published Packages
+            - `img-generator@${{ github.event.inputs.version }}` - Core library
+            
+            ### 🔗 Links
+            - [NPM Package](https://www.npmjs.com/package/img-generator)
+            - [Documentation](https://github.com/${{ github.repository }}/blob/main/README.md)
+            
+            ### 📝 Changes
+            See the [CHANGELOG](https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md) for detailed changes.
+          draft: false
+          prerelease: ${{ contains(github.event.inputs.tag, 'beta') || contains(github.event.inputs.tag, 'alpha') }}
+
+  # 部署playground到Vercel（可选）
+  deploy-playground:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'release'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
         with:
           version: 8.6.0
           
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
         
-      - name: Build
-        run: pnpm build
+      - name: Build playground
+        run: pnpm build:playground
         
-      - name: Publish to NPM
-        run: pnpm publish --no-git-checks
+      - name: Deploy to Vercel
+        if: env.VERCEL_TOKEN
+        run: |
+          cd packages/playground
+          npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} 
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }} 

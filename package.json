@@ -4,7 +4,7 @@
   "description": "OG Image Generator with JSX support",
   "private": true,
   "scripts": {
-    "start": "pnpm --recursive start ",
+    "start": "pnpm --recursive start",
     "dev": "pnpm --parallel dev",
     "dev:core": "cd packages/core && pnpm dev",
     "dev:api": "cd packages/api && pnpm dev",
@@ -15,7 +15,16 @@
     "build:playground": "cd packages/playground && pnpm build",
     "test": "cd packages/core && pnpm test",
     "lint": "pnpm --recursive lint",
-    "clean": "pnpm --recursive clean"
+    "clean": "pnpm --recursive clean",
+    "publish:core": "cd packages/core && npm publish --access public",
+    "version:patch": "cd packages/core && npm version patch",
+    "version:minor": "cd packages/core && npm version minor", 
+    "version:major": "cd packages/core && npm version major",
+    "release:patch": "pnpm version:patch && pnpm publish:core",
+    "release:minor": "pnpm version:minor && pnpm publish:core",
+    "release:major": "pnpm version:major && pnpm publish:core",
+    "check": "pnpm build && pnpm test && pnpm lint",
+    "setup-actions": "node scripts/setup-actions.js"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
@@ -24,5 +33,23 @@
   "engines": {
     "node": ">=18.0.0",
     "pnpm": ">=8.0.0"
-  }
+  },
+  "keywords": [
+    "og-image",
+    "image-generation",
+    "jsx",
+    "react",
+    "vercel",
+    "satori",
+    "social-media",
+    "open-graph"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/img-generator.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/img-generator/issues"
+  },
+  "homepage": "https://github.com/your-username/img-generator#readme"
 } 
