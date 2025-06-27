@@ -9,8 +9,10 @@
     "build": "tsc",
     "clean": "rm -rf lib",
     "prebuild": "pnpm run clean",
+    "start": "echo 'start'",
     "test": "echo 'test'",
-    "dev": "echo 'dev'"
+    "dev": "echo 'dev'",
+    "pub": "npm publish --access public"
   },
   "dependencies": {
     "@vercel/og": "^0.6.2",

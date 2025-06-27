@@ -4,6 +4,7 @@
   "description": "OG Image Generator with JSX support",
   "private": true,
   "scripts": {
+    "start": "pnpm --recursive start ",
     "dev": "pnpm --parallel dev",
     "dev:core": "cd packages/core && pnpm dev",
     "dev:api": "cd packages/api && pnpm dev",
