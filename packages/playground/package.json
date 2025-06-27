@@ -1,0 +1,36 @@
+{
+  "name": "@img-generator/playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "图片生成器在线体验平台",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@headlessui/react": "^2.2.4",
+    "@heroicons/react": "^2.2.0",
+    "@monaco-editor/react": "^4.7.0",
+    "@tailwindcss/forms": "^0.5.10",
+    "@vercel/og": "^0.6.2",
+    "img-generator": "workspace:*",
+    "monaco-editor": "^0.52.2",
+    "next": "15.2.4",
+    "react": "^18",
+    "react-dom": "^18",
+    "satori": "^0.15.2",
+    "tailwindcss": "^3.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.21",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.5",
+    "postcss": "^8.5.6",
+    "typescript": "^5"
+  }
+}

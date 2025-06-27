@@ -1,0 +1,32 @@
+{
+  "name": "img-generator",
+  "version": "0.0.3",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "private": true,
+  "description": "OG image generator core library",
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf lib",
+    "prebuild": "pnpm run clean",
+    "test": "echo 'test'",
+    "dev": "echo 'dev'"
+  },
+  "dependencies": {
+    "@vercel/og": "^0.6.2",
+    "emoji-regex": "^10.2.1"
+  },
+  "peerDependencies": {
+    "react": "^18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/react": "^18.0.0",
+    "react": "^18.0.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
