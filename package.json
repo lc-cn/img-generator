@@ -14,6 +14,7 @@
     "build:api": "cd packages/api && pnpm build",
     "build:playground": "cd packages/playground && pnpm build",
     "test": "cd packages/core && pnpm test",
+    "pub": "pnpm --recursive pub",
     "lint": "pnpm --recursive lint",
     "clean": "pnpm --recursive clean",
     "publish:core": "cd packages/core && npm publish --access public",
