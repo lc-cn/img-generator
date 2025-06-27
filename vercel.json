@@ -6,12 +6,6 @@
       "use": "@vercel/next"
     }
   ],
-  "functions": {
-    "packages/playground/app/api/og/route.ts": {
-      "maxDuration": 30,
-      "memory": 1024
-    }
-  },
   "env": {
     "NODE_ENV": "production",
     "NEXT_TELEMETRY_DISABLED": "1"
