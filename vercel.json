@@ -1,0 +1,32 @@
+{
+  "version": 2,
+  "name": "img-generator-playground",
+  "framework": "nextjs",
+  "buildCommand": "pnpm build:core && pnpm build:playground",
+  "outputDirectory": "packages/playground/.next",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "rootDirectory": "packages/playground",
+  "functions": {
+    "packages/playground/app/api/og/route.ts": {
+      "maxDuration": 30,
+      "memory": 1024
+    }
+  },
+  "env": {
+    "NODE_ENV": "production",
+    "NEXT_TELEMETRY_DISABLED": "1"
+  },
+  "regions": ["hkg1", "sin1"],
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/:path*"
+    }
+  ],
+  "ignores": [
+    "packages/core/**",
+    "scripts/**",
+    "*.md",
+    ".github/**"
+  ]
+} 
