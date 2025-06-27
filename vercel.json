@@ -1,7 +1,7 @@
 {
   "version": 2,
   "name": "img-generator-playground",
-  "buildCommand": "pnpm build:core",
+  "buildCommand": "pnpm build",
   "outputDirectory": "packages/playground/.next",
   "installCommand": "pnpm install --frozen-lockfile",
   "functions": {
