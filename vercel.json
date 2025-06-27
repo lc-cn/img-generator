@@ -14,7 +14,6 @@
     "NODE_ENV": "production",
     "NEXT_TELEMETRY_DISABLED": "1"
   },
-  "regions": ["hkg1", "sin1"],
   "rewrites": [
     {
       "source": "/api/:path*",

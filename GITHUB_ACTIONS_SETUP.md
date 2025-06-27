@@ -11,6 +11,7 @@
 - **`.github/release-please-config.json`** - Release Please配置
 - **`.github/.release-please-manifest.json`** - 版本清单文件
 - **`.github/README.md`** - 详细使用文档
+- **`vercel.json`** - Vercel部署配置（根目录）
 
 ### 📦 项目脚本
 - **`scripts/setup-actions.js`** - 自动配置脚本
@@ -59,6 +60,28 @@ pnpm release:major  # 0.0.3 → 1.0.0
 NPM_TOKEN=npm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+#### Vercel 部署（可选）
+```
+VERCEL_TOKEN=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+VERCEL_ORG_ID=team_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+VERCEL_PROJECT_ID=prj_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+## 🌐 Vercel 部署配置
+
+### 配置说明
+- **位置**: 根目录 `vercel.json`
+- **构建命令**: `pnpm build:core && pnpm build:playground`
+- **输出目录**: `packages/playground/.next`
+- **框架**: Next.js 15 自动检测
+
+### 部署流程
+1. Vercel 从根目录读取配置
+2. 安装所有依赖 (`pnpm install`)
+3. 构建 core 包 (`pnpm build:core`)
+4. 构建 playground (`pnpm build:playground`)
+5. 部署 playground 到生产环境
+
 ## 🎉 使用示例
 
 ### 开发新功能
@@ -79,6 +102,19 @@ git push origin main
 # Release Please 会自动创建 PR，合并后自动发布
 ```
 
+### Next.js 15 特性
+- ✅ 无构建警告
+- ✅ 优化的 Webpack 配置
+- ✅ 自动忽略动态导入警告
+- ✅ 支持 App Router
+- ✅ 优化的生产构建
+
 ---
 
-**🎉 恭喜！你的项目现在具备了完整的CI/CD能力！** 
+**🎉 恭喜！你的项目现在具备了完整的CI/CD能力！**
+
+### 📝 重要提醒
+- `vercel.json` 已移动到根目录
+- 支持 Next.js 15 的最新特性
+- 构建过程已优化，无警告输出
+- 部署配置已针对 monorepo 结构优化 
