@@ -1,9 +1,11 @@
 {
   "version": 2,
-  "name": "img-generator-playground",
-  "buildCommand": "pnpm build",
-  "outputDirectory": "packages/playground/.next",
-  "installCommand": "pnpm install --frozen-lockfile",
+  "builds": [
+    {
+      "src": "packages/playground/package.json",
+      "use": "@vercel/next"
+    }
+  ],
   "functions": {
     "packages/playground/app/api/og/route.ts": {
       "maxDuration": 30,
@@ -13,11 +15,5 @@
   "env": {
     "NODE_ENV": "production",
     "NEXT_TELEMETRY_DISABLED": "1"
-  },
-  "rewrites": [
-    {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
-    }
-  ]
+  }
 } 
