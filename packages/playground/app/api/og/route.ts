@@ -1,5 +1,8 @@
+export const runtime = 'nodejs';
+
 import { NextRequest, NextResponse } from 'next/server'
-import { jsxToBuffer, jsxStringToBuffer, htmlToBuffer, renderComponent, renderFolder } from 'img-generator'
+import { generateImage, generateImageFromInput, jsxStringToBuffer } from 'img-generator'
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json()
@@ -9,26 +12,17 @@ export async function POST(request: NextRequest) {
 
     switch (type) {
       case 'jsx':
-        // 支持对象和字符串两种格式
-        buffer = await jsxToBuffer(content, options)
+        buffer = await generateImage(content, options)
         break
       case 'jsx-string':
-        // 专门处理JSX字符串
         buffer = await jsxStringToBuffer(content, options)
         break
-      case 'html':
-        buffer = await htmlToBuffer(content, options)
-        break
-      case 'component':
-        const { componentName, props = {} } = content
-        buffer = await renderComponent(componentName, {props, ...options})
-        break
-      case 'folder':
-        buffer = await renderFolder(content, options)
+      case 'auto':
+        buffer = await generateImageFromInput(content, options)
         break
       default:
         return NextResponse.json(
-          { error: 'Invalid type. Must be jsx, jsx-string, html, component, or folder' },
+          { error: 'Invalid type. Must be jsx, jsx-string, or auto' },
           { status: 400 }
         )
     }
@@ -39,10 +33,10 @@ export async function POST(request: NextRequest) {
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error)
     return NextResponse.json(
-      { error: 'Failed to generate image' },
+      { error: 'Failed to generate image', details: error?.message || 'Unknown error' },
       { status: 500 }
     )
   }
@@ -65,7 +59,7 @@ export async function GET(request: NextRequest) {
   try {
     let buffer: Buffer
     const parsedOptions = options ? JSON.parse(options) : {}
-    
+
     // 处理内容：优先使用base64编码的内容
     let processedContent: any
     if (contentBase64) {
@@ -89,28 +83,17 @@ export async function GET(request: NextRequest) {
 
     switch (type) {
       case 'jsx':
-        console.log('jsx', { content: processedContent }, parsedOptions)
-        // 支持对象和字符串两种格式
-        buffer = await jsxToBuffer(processedContent, parsedOptions)
+        buffer = await generateImage(processedContent, parsedOptions)
         break
       case 'jsx-string':
-        console.log('jsx-string', { content: processedContent }, parsedOptions)
-        // 专门处理JSX字符串
         buffer = await jsxStringToBuffer(processedContent, parsedOptions)
         break
-      case 'html':
-        buffer = await htmlToBuffer(processedContent, parsedOptions)
-        break
-      case 'component':
-        const { componentName, props = {} } = processedContent
-        buffer = await renderComponent(componentName, {props, ...parsedOptions})
-        break
-      case 'folder':
-        buffer = await renderFolder(processedContent, parsedOptions)
+      case 'auto':
+        buffer = await generateImageFromInput(processedContent, parsedOptions)
         break
       default:
         return NextResponse.json(
-          { error: 'Invalid type. Must be jsx, jsx-string, html, component, or folder' },
+          { error: 'Invalid type. Must be jsx, jsx-string, or auto' },
           { status: 400 }
         )
     }
@@ -121,10 +104,10 @@ export async function GET(request: NextRequest) {
         'Cache-Control': 'public, max-age=31536000, immutable',
       },
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('API Error:', error)
     return NextResponse.json(
-      { error: 'Failed to generate image' },
+      { error: 'Failed to generate image', details: error?.message || 'Unknown error' },
       { status: 500 }
     )
   }

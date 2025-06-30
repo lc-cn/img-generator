@@ -1,6 +1,6 @@
 import { ReactElement, createElement } from 'react'
-import { loadCSSFile, mergeClassAndStyle } from './css'
-import { loadResource } from './resources'
+import { loadCSSFile, mergeClassAndStyle } from './css.js'
+import { loadResource } from './resources.js'
 
 /**
  * 轻量级 HTML 到 JSX 转换器（递归为所有 div 多子节点自动加 display: flex）

@@ -1,284 +1,309 @@
-# Core Package - Image Generator
+# IMG Generator Core
 
-核心渲染库，提供JSX到图片转换的所有功能。
+一个强大的图片生成库，支持从 JSX/React 元素生成 PNG、SVG 等格式的图片。底层使用 `satori` + `@resvg/resvg-js` 实现，同时支持 ESM 和 CommonJS。
 
-## 🚀 功能特性
+## 特性
 
-- **🎨 JSX 渲染** - 支持JSX字符串和对象格式
-- **🔄 统一格式** - 标准化的JSX对象结构
-- **⚛️ React 兼容** - 使用React类型，自定义函数实现
-- **🌐 HTML 转换** - HTML到JSX的转换
-- **📁 文件夹渲染** - 批量渲染文件夹中的组件
-- **🎭 Emoji 支持** - 自动检测和渲染emoji
-- **🔤 字体加载** - 自动加载Google字体
-- **🖼️ 图片处理** - 支持图片资源加载
-- **🔒 类型安全** - 完整的TypeScript类型支持
+- 🚀 **高性能**: 基于 `satori` 和 `@resvg/resvg-js` 的底层实现
+- 📦 **双模块支持**: 同时支持 ESM 和 CommonJS
+- 🎨 **JSX 支持**: 支持 JSX 语法和 React 元素
+- 🔧 **TypeScript**: 完整的 TypeScript 类型支持
+- 🎯 **自动布局**: 智能的 Flexbox 布局修复
+- 🌍 **字体支持**: 支持 Google Fonts 和自定义字体
+- 🎭 **多格式**: 支持 PNG、SVG 输出格式
 
-## 📦 安装
+## 安装
 
 ```bash
 npm install img-generator
+# 或
+pnpm add img-generator
+# 或
+yarn add img-generator
 ```
 
-## ⚛️ React类型兼容性
+## 快速开始
 
-本库采用独特的设计：**使用React的官方类型定义，但实现自定义的函数**。这样既保证了与`@vercel/og`等库的完全类型兼容性，又避免了对React运行时的依赖。
+### ESM 使用方式
 
-### 核心实现
+```javascript
+import { generateImage, createElement } from 'img-generator';
+import fs from 'fs';
 
+// 创建一个简单的元素
+const element = createElement('div', {
+  style: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f0f0f0',
+    fontSize: '48px',
+    color: '#333',
+  }
+}, 'Hello, World!');
+
+// 生成图片
+const buffer = await generateImage(element, {
+  width: 800,
+  height: 600,
+  format: 'png'
+});
+
+// 保存图片
+fs.writeFileSync('output.png', buffer);
+```
+
+### CommonJS 使用方式
+
+```javascript
+const { generateImage, createElement } = require('img-generator');
+const fs = require('fs');
+
+async function generateImg() {
+  const element = createElement('div', {
+    style: {
+      width: '100%',
+      height: '100%',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      backgroundColor: '#e3f2fd',
+      fontSize: '36px',
+      color: '#1976d2',
+    }
+  }, 'CommonJS Works!');
+
+  const buffer = await generateImage(element, {
+    width: 600,
+    height: 400
+  });
+
+  fs.writeFileSync('output.png', buffer);
+}
+
+generateImg();
+```
+
+## API 文档
+
+### `generateImage(element, options)`
+
+生成图片的核心函数。
+
+**参数:**
+- `element`: React 元素或 JSX 对象
+- `options`: 生成选项
+
+**选项:**
 ```typescript
-// 使用React的类型定义
-import { ReactElement, JSXElementConstructor } from 'react';
-
-// 但实现自定义函数
-export function createElement(type, props, ...children): ReactElement {
-  // 自定义实现逻辑
-}
-
-export function isValidElement(object): object is ReactElement {
-  // 自定义验证逻辑
+interface GenerateOptions {
+  width?: number;          // 图片宽度，默认 1200
+  height?: number;         // 图片高度，默认 630
+  format?: 'png' | 'svg';  // 输出格式，默认 'png'
+  quality?: number;        // 图片质量，默认 90
+  debug?: boolean;         // 调试模式
+  background?: string;     // 背景颜色
 }
 ```
 
-### 优势
+### `createElement(type, props, ...children)`
 
-- ✅ **完全类型兼容** - 与React生态系统类型完全兼容
-- ✅ **无运行时依赖** - 不需要React运行时
-- ✅ **性能优化** - 专为图片生成优化的实现
-- ✅ **@vercel/og兼容** - 直接兼容Vercel OG库
+创建 React 元素的工具函数。
 
-## 🎯 JSX格式规范
+**参数:**
+- `type`: 元素类型（字符串或组件）
+- `props`: 元素属性
+- `children`: 子元素
 
-### 标准JSX对象格式
-
-本库使用以下统一的JSX对象格式：
+### 其他实用函数
 
 ```javascript
-{
-  type: string,
-  props: {
-    children?: JSXObject | JSXObject[] | string | number,
-    [key: string]: any
+// 从 JSX 字符串生成图片
+const buffer = await jsxStringToBuffer('<div>Hello</div>', options);
+
+// 自动检测输入类型
+const buffer = await jsxToBuffer(elementOrStringOrObject, options);
+
+// JSX 解析
+const jsxObject = parseJSX('<div>Hello</div>');
+
+// 对象转 JSX 字符串
+const jsxString = objectToJSX(jsxObject);
+```
+
+## 样式支持
+
+库支持大部分 CSS 样式属性，特别针对 Flexbox 布局进行了优化：
+
+```javascript
+const element = createElement('div', {
+  style: {
+    // 布局
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    
+    // 尺寸
+    width: '100%',
+    height: '100%',
+    padding: '20px',
+    margin: '10px',
+    
+    // 外观
+    backgroundColor: '#ffffff',
+    color: '#333333',
+    fontSize: '24px',
+    fontWeight: 'bold',
+    borderRadius: '8px',
+    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+    
+    // 边框
+    border: '1px solid #e0e0e0',
+    borderWidth: '2px',
+    borderStyle: 'solid',
+    borderColor: '#ddd',
   }
-}
+}, 'Styled Content');
 ```
 
-### 示例
+## 字体支持
+
+### Google Fonts
 
 ```javascript
-// ✅ 标准格式
-const jsxObject = {
-  type: 'div',
-  props: {
-    style: { color: 'red', fontSize: '24px' },
-    className: 'my-class',
-    children: 'Hello World'
+import { loadFont } from 'img-generator';
+
+// 加载 Google 字体
+const fontData = await loadFont('Inter', 400, 'normal');
+```
+
+### 自定义字体
+
+```javascript
+import { loadFontFromFile } from 'img-generator';
+
+// 从文件加载字体
+const fontData = await loadFontFromFile('./fonts/custom.ttf');
+```
+
+## 复杂示例
+
+### 卡片样式
+
+```javascript
+const card = createElement('div', {
+  style: {
+    width: '400px',
+    height: '200px',
+    display: 'flex',
+    flexDirection: 'column',
+    backgroundColor: '#ffffff',
+    borderRadius: '12px',
+    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+    padding: '24px',
   }
-}
-
-// ✅ 嵌套结构
-const nestedJSX = {
-  type: 'div',
-  props: {
-    style: { padding: '20px' },
-    children: [
-      {
-        type: 'h1',
-        props: {
-          children: 'Title'
-        }
-      },
-      {
-        type: 'p',
-        props: {
-          children: 'Content'
-        }
-      }
-    ]
-  }
-}
-```
-
-## 🔧 基本用法
-
-### JSX字符串渲染
-
-```javascript
-import { jsxStringToBuffer, jsxToBuffer } from 'img-generator'
-
-// 方式1: 专门的字符串函数
-const jsxString = `<div style={{color: "red"}}>Hello World</div>`
-const buffer1 = await jsxStringToBuffer(jsxString)
-
-// 方式2: 统一接口（自动检测）
-const buffer2 = await jsxToBuffer(jsxString)
-```
-
-### JSX对象渲染
-
-```javascript
-import { jsxToBuffer } from 'img-generator'
-
-const jsxObject = {
-  type: 'div',
-  props: {
+}, [
+  createElement('h2', {
     style: {
-      width: '800px',
-      height: '600px',
-      background: '#3b82f6',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
-      fontSize: '32px'
-    },
-    children: 'Hello from JSX Object!'
-  }
-}
-
-const buffer = await jsxToBuffer(jsxObject)
-```
-
-### JSX解析和转换
-
-```javascript
-import { parseJSX, objectToJSX } from 'img-generator'
-
-// JSX字符串 → 对象
-const jsxString = `<div style={{color: "red"}}>Hello</div>`
-const parsed = parseJSX(jsxString)
-console.log(parsed)
-// 输出: { type: 'div', props: { style: { color: 'red' }, children: 'Hello' } }
-
-// 对象 → JSX字符串
-const backToJSX = objectToJSX(parsed)
-console.log(backToJSX)
-// 输出: <div style={{color: 'red'}}>Hello</div>
-```
-
-## 🎨 样式处理
-
-### 内联样式
-
-```javascript
-const styledJSX = {
-  type: 'div',
-  props: {
-    style: {
-      width: '400px',
-      height: '300px',
-      background: 'linear-gradient(45deg, #ff6b6b, #4ecdc4)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      color: 'white',
       fontSize: '24px',
-      fontFamily: 'Arial, sans-serif',
-      borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0,0,0,0.1)'
-    },
-    children: 'Styled Component'
+      fontWeight: 'bold',
+      color: '#1a1a1a',
+      margin: '0 0 12px 0',
+    }
+  }, 'Card Title'),
+  
+  createElement('p', {
+    style: {
+      fontSize: '16px',
+      color: '#666666',
+      lineHeight: '1.5',
+      margin: '0',
+    }
+  }, 'This is a description of the card content.')
+]);
+
+const buffer = await generateImage(card, {
+  width: 500,
+  height: 300
+});
+```
+
+### 多语言支持
+
+```javascript
+const multiLang = createElement('div', {
+  style: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#f8f9fa',
+    padding: '40px',
+  }
+}, [
+  createElement('div', { 
+    style: { fontSize: '32px', marginBottom: '16px' } 
+  }, '🌍 Hello World'),
+  
+  createElement('div', { 
+    style: { fontSize: '24px', marginBottom: '8px' } 
+  }, '你好世界'),
+  
+  createElement('div', { 
+    style: { fontSize: '24px', marginBottom: '8px' } 
+  }, 'こんにちは世界'),
+  
+  createElement('div', { 
+    style: { fontSize: '24px' } 
+  }, '안녕하세요 세계'),
+]);
+```
+
+## 错误处理
+
+```javascript
+try {
+  const buffer = await generateImage(element, options);
+  console.log('图片生成成功');
+} catch (error) {
+  if (error.message.includes('font')) {
+    console.error('字体加载失败:', error);
+  } else if (error.message.includes('satori')) {
+    console.error('SVG 生成失败:', error);
+  } else {
+    console.error('未知错误:', error);
   }
 }
 ```
 
-### CSS类名（配合HTML转换）
+## 性能优化
 
-```javascript
-import { htmlToBuffer } from 'img-generator'
+1. **缓存字体**: 字体加载是耗时操作，建议缓存字体数据
+2. **合理尺寸**: 避免生成过大的图片
+3. **样式优化**: 使用简单的样式可以提高渲染速度
 
-const htmlWithCSS = `
-  <style>
-    .card {
-      width: 400px;
-      height: 300px;
-      background: #f3f4f6;
-      border-radius: 8px;
-      padding: 20px;
-    }
-  </style>
-  <div class="card">
-    <h2>Card Title</h2>
-    <p>Card content</p>
-  </div>
-`
+## 限制
 
-const buffer = await htmlToBuffer(htmlWithCSS)
-```
+1. **CSS 支持**: 不支持所有 CSS 特性，主要支持 Flexbox 布局
+2. **图片格式**: 目前主要支持 PNG 和 SVG，JPEG 支持有限
+3. **字体**: 需要显式加载字体，不支持系统字体回退
 
-## 🔧 配置选项
+## 许可证
 
-```javascript
-const options = {
-  width: 1200,           // 图片宽度
-  height: 630,           // 图片高度
-  fonts: [               // 自定义字体
-    {
-      name: 'Inter',
-      data: fontBuffer,
-      weight: 400,
-      style: 'normal'
-    }
-  ]
-}
+MIT
 
-const buffer = await jsxToBuffer(jsxObject, options)
-```
+## 贡献
 
-## 🧪 测试
+欢迎提交 Issue 和 Pull Request！
 
-```bash
-# 运行测试
-npm test
+## 更新日志
 
-# 运行特定测试
-node test-jsx-core.js
-```
-
-## 📚 API 参考
-
-### jsxToBuffer(element, options?, baseDir?, cssStyles?)
-
-将JSX对象或字符串转换为图片Buffer。
-
-**参数:**
-- `element` - JSX对象或JSX字符串
-- `options` - 图片选项（可选）
-- `baseDir` - 基础目录（可选）
-- `cssStyles` - CSS样式（可选）
-
-**返回:** `Promise<Buffer>`
-
-### jsxStringToBuffer(jsxString, options?, baseDir?)
-
-专门处理JSX字符串的函数。
-
-**参数:**
-- `jsxString` - JSX字符串
-- `options` - 图片选项（可选）
-- `baseDir` - 基础目录（可选）
-
-**返回:** `Promise<Buffer>`
-
-### parseJSX(jsxString)
-
-将JSX字符串解析为标准JSX对象。
-
-**参数:**
-- `jsxString` - JSX字符串
-
-**返回:** `JSXObject`
-
-### objectToJSX(jsxObject, indent?)
-
-将JSX对象转换为JSX字符串。
-
-**参数:**
-- `jsxObject` - JSX对象
-- `indent` - 缩进级别（可选）
-
-**返回:** `string`
-
-## �� 许可证
-
-MIT License 
+### v0.1.0
+- 初始版本
+- 支持 ESM 和 CommonJS
+- 基于 satori + resvg-js 实现
+- 支持 JSX 和 React 元素
+- 自动 Flexbox 布局修复 

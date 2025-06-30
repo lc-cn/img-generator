@@ -11,8 +11,8 @@ import {
   CheckIcon,
   ArrowsRightLeftIcon
 } from '@heroicons/react/24/outline'
-// 使用core层的JSX解析器
-import { parseJSX, objectToJSX } from 'img-generator'
+// 使用客户端专用的JSX解析器
+import { parseJSX, objectToJSX } from 'img-generator/client'
 
 // 动态导入Monaco编辑器避免SSR问题
 const MonacoEditor = dynamic(() => import('@monaco-editor/react'), {
@@ -730,7 +730,7 @@ export default function Playground() {
                   </button>
                 </div>
               </div>
-            </div>
+                </div>
 
             {/* 右侧预览 - 占1/3宽度 */}
             <div className="w-1/3">
@@ -738,21 +738,21 @@ export default function Playground() {
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-lg font-semibold text-gray-900">预览</h2>
                   {generatedImage && (
-                    <button
+                <button
                       onClick={downloadImage}
                       className="flex items-center px-3 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                    >
+                >
                       <ArrowDownTrayIcon className="h-4 w-4 mr-2" />
                       下载
-                    </button>
+                </button>
                   )}
-                </div>
+            </div>
 
                 <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center h-96 flex items-center justify-center">
                   {generatedImage ? (
-                    <img
-                      src={generatedImage}
-                      alt="Generated"
+                      <img
+                        src={generatedImage}
+                        alt="Generated"
                       className="max-w-full max-h-full object-contain rounded-lg shadow-lg"
                     />
                   ) : (
@@ -782,7 +782,7 @@ export default function Playground() {
                       <span className="font-medium">Content-Type:</span> <code className="bg-white px-2 py-1 rounded text-sm">application/json</code>
                     </p>
                   </div>
-                </div>
+                  </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">请求示例</h3>
@@ -802,7 +802,7 @@ export default function Playground() {
                     )}
                     {copied ? '已复制' : '复制命令'}
                   </button>
-                </div>
+                  </div>
 
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-3">支持的类型</h3>

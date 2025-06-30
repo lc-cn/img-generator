@@ -18,15 +18,27 @@ export function createElement<P extends {}>(
   props?: P | null,
   ...children: ReactNode[]
 ): ReactElement {
+  const safeProps = props || {};
+  
+  // 如果props中已经有children，优先使用props.children
+  // 否则使用传递的children参数
+  let finalChildren: ReactNode;
+  if ('children' in safeProps && (safeProps as any).children !== undefined) {
+    finalChildren = (safeProps as any).children;
+  } else if (children.length > 0) {
+    finalChildren = children.length === 1 ? children[0] : children;
+  } else {
+    finalChildren = undefined;
+  }
+
   return {
     $$typeof: Symbol.for('react.element'),
     type,
-    key: (props as any)?.key || null,
-    ref: (props as any)?.ref || null,
+    key: (safeProps as any)?.key || null,
+    ref: (safeProps as any)?.ref || null,
     props: {
-      ...props,
-      children: children.length === 0 ? undefined : 
-               children.length === 1 ? children[0] : children,
+      ...safeProps,
+      children: finalChildren,
     },
     _owner: null,
     _store: {},
@@ -73,6 +85,7 @@ export function jsxObjectToReactElement(jsxObj: JSXObject): ReactElement {
     return createElement(jsxObj.type, otherProps, jsxObjectToReactElement(children));
   }
   
+  // 对于字符串或其他类型的children，直接传递
   return createElement(jsxObj.type, otherProps, children);
 }
 
