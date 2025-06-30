@@ -52,8 +52,8 @@ importers:
         specifier: ^0.6.2
         version: 0.6.8
       img-generator:
-        specifier: workspace:*
-        version: link:../core
+        specifier: ^0.1.0
+        version: 0.1.0(react@18.3.1)
       monaco-editor:
         specifier: ^0.52.2
         version: 0.52.2
@@ -1493,6 +1493,11 @@ packages:
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
     engines: {node: '>= 4'}
+
+  img-generator@0.1.0:
+    resolution: {integrity: sha512-xzO18YneaeCd+21RtcrztyL8TONIHRyjX/+deOvjkIqoQ6qHiNXk5isJW6L7VowmqeCAzNJ949B1MeXiBomrGQ==}
+    peerDependencies:
+      react: '>=16.8.0'
 
   import-fresh@3.3.1:
     resolution: {integrity: sha512-TR3KfrTZTYLPB6jUjfx6MF9WcWrHL9su5TObK4ZkYgBdWKPOFoSoQIdEuTuR82pmtxH2spWG9h6etwfr1pLBqQ==}
@@ -4014,6 +4019,12 @@ snapshots:
   ignore-loader@0.1.2: {}
 
   ignore@5.3.2: {}
+
+  img-generator@0.1.0(react@18.3.1):
+    dependencies:
+      '@resvg/resvg-js': 2.6.2
+      react: 18.3.1
+      satori: 0.12.2
 
   import-fresh@3.3.1:
     dependencies:

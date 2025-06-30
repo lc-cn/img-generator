@@ -31,7 +31,7 @@
     "start": "echo 'start'",
     "test": "echo 'test'",
     "dev": "echo 'dev'",
-    "publish:npm": "npm publish --access public"
+    "pub": "npm publish --access public"
   },
   "dependencies": {
     "satori": "^0.12.0",
